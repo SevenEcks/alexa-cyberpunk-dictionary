@@ -35,7 +35,7 @@ def build_definition_speech_response(word_data):
 
 # --------------- Functions that control the skill's behavior ------------------
 def get_help(intent, session):
-    ''' tell the user a list of valid commands '''
+    '''tell the user a list of valid commands'''
     #load the json data for this intent
     response_data = load_json_from_file(SPEECH_DIRECTORY + get_help.__name__ + SPEECH_FORMAT)
     session_attributes = {}
@@ -58,9 +58,7 @@ def pick_cyberpunk_word(intent, session):
         should_end_session))
 
 def welcome_response():
-    ''' If we wanted to initialize the session to have some attributes we could
-    add those here
-    '''
+    '''If we wanted to initialize the session to have some attributes we could add those here'''
     response_data = load_json_from_file(SPEECH_DIRECTORY + welcome_response.__name__ + SPEECH_FORMAT)
     session_attributes = {}
     should_end_session = False
@@ -68,7 +66,7 @@ def welcome_response():
         response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
 
 def define_cyberpunk_word(intent, session):
-    ''' Sets the color in the session and prepares the speech to reply to the user. '''
+    '''Sets the color in the session and prepares the speech to reply to the user'''
     response_data = load_json_from_file(SPEECH_DIRECTORY + define_cyberpunk_word.__name__ + SPEECH_FORMAT)
     print(response_data)
     session_attributes = {}
@@ -89,10 +87,7 @@ def define_cyberpunk_word(intent, session):
         response_data['card_title'], speech_output, reprompt, should_end_session))
 
 def invalid_intent_response(intent, session):
-    '''
-    we reached an invalid intention due to the user asking for something
-    that we are not sure how to process.
-    '''
+    '''Invalid intention due to the user asking for something we are not sure how to process'''
     print(intent)
     response_data = load_json_from_file(SPEECH_DIRECTORY + invalid_intent_response.__name__ + SPEECH_FORMAT)
     session_attributes = {}
@@ -102,7 +97,7 @@ def invalid_intent_response(intent, session):
 
 # --------------- Skill Dipatcher Functions ------------------
 def lambda_handler(event, context):
-    ''' Route the incoming request based on type (LaunchRequest, IntentRequest,
+    '''Route the incoming request based on type (LaunchRequest, IntentRequest,
     etc.) The JSON body of the request is provided in the event parameter.
     '''
     print("event.session.application.applicationId=" +
@@ -126,17 +121,17 @@ def lambda_handler(event, context):
         return on_session_ended(event['request'], event['session'])
 
 def on_session_started(session_started_request, session):
-    ''' Called when the session starts '''
+    '''Called when the session starts'''
 
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
 
 def on_launch(launch_request, session):
-    ''' Called when the user launches the skill without specifying an intent '''
+    '''Called when the user launches the skill without specifying an intent '''
     return welcome_response()
 
 def on_intent(intent_request, session):
-    ''' Called when the user specifies an intent for this skill '''
+    '''Called when the user specifies an intent for this skill'''
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
     print(intent_name)
@@ -152,7 +147,7 @@ def on_intent(intent_request, session):
         return invalid_intent_response(intent, session)
 
 def on_session_ended(session_ended_request, session):
-    ''' Called when the user ends the session.
+    '''Called when the user ends the session.
         Is not called when the skill returns should_end_session=true
     '''
     pass
