@@ -1,13 +1,14 @@
-"""
+'''
 This application will act as a Cyberpunk Dictionary.  You can find the sourcecode on GitHub
 at https://github.com/SevenEcks/alexa-cyberpunk-dictionary
-"""
+'''
 
 from __future__ import print_function
 import random
 import json
 import os
 
+# --------------- Static Variables ------------------
 APPLICATION_ID = 'amzn1.echo-sdk-ams.app.1a291230-7f25-48ed-b8b7-747205d072db'
 APPLICATION_NAME = 'The Cyberpunk Dictionary'
 APPLICATION_INVOCATION_NAME = 'the cyberpunk dictionary'
@@ -33,9 +34,8 @@ def build_definition_speech_response(word_data):
     return "{0}: {1} Usage: {2}".format(word_data['name'], word_data['definition'], random.choice(list(word_data['usage'])))
 
 # --------------- Functions that control the skill's behavior ------------------
-
 def get_help(intent, session):
-    """ tell the user a list of valid commands """
+    ''' tell the user a list of valid commands '''
     #load the json data for this intent
     response_data = load_json_from_file(SPEECH_DIRECTORY + get_help.__name__ + SPEECH_FORMAT)
     session_attributes = {}
@@ -56,7 +56,7 @@ def pick_cyberpunk_word(intent, session):
     return build_response(session_attributes, build_speechlet_response(
         response_data['card_title'], build_definition_speech_response(word_data), response_data['reprompt'], 
         should_end_session))
-        
+
 def welcome_response():
     ''' If we wanted to initialize the session to have some attributes we could
     add those here
@@ -67,11 +67,8 @@ def welcome_response():
     return build_response(session_attributes, build_speechlet_response(
         response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
 
-
 def define_cyberpunk_word(intent, session):
-    ''' Sets the color in the session and prepares the speech to reply to the
-    user.
-    '''
+    ''' Sets the color in the session and prepares the speech to reply to the user. '''
     response_data = load_json_from_file(SPEECH_DIRECTORY + define_cyberpunk_word.__name__ + SPEECH_FORMAT)
     print(response_data)
     session_attributes = {}
@@ -105,16 +102,13 @@ def invalid_intent_response(intent, session):
 
 # --------------- Skill Dipatcher Functions ------------------
 def lambda_handler(event, context):
-    """ Route the incoming request based on type (LaunchRequest, IntentRequest,
+    ''' Route the incoming request based on type (LaunchRequest, IntentRequest,
     etc.) The JSON body of the request is provided in the event parameter.
-    """
+    '''
     print("event.session.application.applicationId=" +
           event['session']['application']['applicationId'])
 
-    """
-    Prevent someone else from configuring a skill that sends requests to this
-    function.
-    """
+    #Prevent someone else from configuring a skill that sends requests to this function.
     if (event['session']['application']['applicationId'] != 
         APPLICATION_ID):
         #TODO make this return a response via alexa?
@@ -131,31 +125,18 @@ def lambda_handler(event, context):
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
 
-
 def on_session_started(session_started_request, session):
-    """ Called when the session starts """
+    ''' Called when the session starts '''
 
     print("on_session_started requestId=" + session_started_request['requestId']
           + ", sessionId=" + session['sessionId'])
 
-
 def on_launch(launch_request, session):
-    """ Called when the user launches the skill without specifying what they
-    want
-    """
-
-    print("on_launch requestId=" + launch_request['requestId'] +
-          ", sessionId=" + session['sessionId'])
-    # Dispatch to your skill's launch
+    ''' Called when the user launches the skill without specifying an intent '''
     return welcome_response()
 
-
 def on_intent(intent_request, session):
-    """ Called when the user specifies an intent for this skill """
-    print('on intent')
-    print("on_intent requestId=" + intent_request['requestId'] +
-          ", sessionId=" + session['sessionId'])
-
+    ''' Called when the user specifies an intent for this skill '''
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
     print(intent_name)
@@ -165,26 +146,18 @@ def on_intent(intent_request, session):
         return define_cyberpunk_word(intent, session)
     elif intent_name == "PickCyberpunkWord":
         return pick_cyberpunk_word(intent, session)
-    #elif intent_name == "TranslateEnglishWord":
-        #return translate_english_word(intent, session)
     elif intent_name == "AMAZON.HelpIntent":
         return get_help(intent, session)
     else:
         return invalid_intent_response(intent, session)
 
-
 def on_session_ended(session_ended_request, session):
-    """ Called when the user ends the session.
-
-    Is not called when the skill returns should_end_session=true
-    """
-    print("on_session_ended requestId=" + session_ended_request['requestId'] +
-          ", sessionId=" + session['sessionId'])
-    # add cleanup logic here
+    ''' Called when the user ends the session.
+        Is not called when the skill returns should_end_session=true
+    '''
+    pass
 
 # --------------- Helpers that build all of the responses ----------------------
-
-
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
         'outputSpeech': {
@@ -204,7 +177,6 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         },
         'shouldEndSession': should_end_session
     }
-
 
 def build_response(session_attributes, speechlet_response):
     return {
