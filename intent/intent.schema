@@ -1,0 +1,22 @@
+{
+  "intents": [
+    {
+      "intent": "DefineCyberpunkWord",
+      "slots": [
+        {
+          "name": "CyberpunkWord",
+          "type": "LIST_OF_CYBERPUNK_WORDS"
+        }
+      ]
+    },
+    {
+      "intent": "PickCyberpunkWord"
+    },
+    {
+      "intent": "TranslateEnglishWord"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    }
+  ]
+}
