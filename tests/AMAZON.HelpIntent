@@ -1,0 +1,21 @@
+{
+  "session": {
+    "new": false,
+    "sessionId": "session1234",
+    "attributes": {},
+    "user": {
+      "userId": null
+    },
+    "application": {
+      "applicationId": "amzn1.echo-sdk-ams.app.1a291230-7f25-48ed-b8b7-747205d072db"
+    }
+  },
+  "version": "1.0",
+  "request": {
+    "intent": {
+      "name": "AMAZON.HelpIntent"
+    },
+    "type": "IntentRequest",
+    "requestId": "request5678"
+  }
+}

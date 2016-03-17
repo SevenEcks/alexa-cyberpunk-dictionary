@@ -1,0 +1,13 @@
+{
+    "name" : "NAME-OF-WORD-HERE",
+    "definition" : "DEFINITION OF WORD HERE",
+    "usage" : [
+        "SENTENCE 1 USING WORD",
+        "SENTENCE X USING WORD"
+    ],
+    "english" : [
+        "ENGLISH SYNONYM #1",
+        "ENGLISH SYNONYM #2",
+        "ENGLISH SYNONYM #3"
+    ]
+}

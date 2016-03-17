@@ -1,0 +1,6 @@
+{
+    "name" : "help",
+    "card_title" : "Help",
+    "response" : "Ask me to define a specific cyberpunk word by asking: What does splat job mean? Alternatively, you can ask for a random Cyberpunk word.",
+    "reprompt" : "You can ask me for help to hear a list of commands."
+}

@@ -1,35 +1,109 @@
 """
 This application will act as a Cyberpunk Dictionary.  You can find the sourcecode on GitHub
-at XYZURLHERE
-
-
+at https://github.com/SevenEcks/alexa-cyberpunk-dictionary
 """
 
 from __future__ import print_function
 import random
+import json
+import os
 
-#static for our alexa application id
 APPLICATION_ID = 'amzn1.echo-sdk-ams.app.1a291230-7f25-48ed-b8b7-747205d072db'
-
 APPLICATION_NAME = 'The Cyberpunk Dictionary'
-
 APPLICATION_INVOCATION_NAME = 'the cyberpunk dictionary'
-
 APPLICATION_VERSION = '0.1'
-
 APPLICATION_ENDPOINT = 'arn:aws:lambda:us-east-1:099464953977:function:basic_speech_test'
+DICTIONARY_DIRECTORY = 'dictionary/'
+DICTIONARY_FORMAT = '.json'
+SPEECH_DIRECTORY = 'speech/'
+SPEECH_FORMAT = '.json'
 
-dict = {"baka" : "Baka: slang for fool, or idiot.  Usage: Don't be a baka.",
-        "splat job" : "Splat Job: Used to refer to someone who died " \
-        "falling from a great height.  An alternate usage would be to " \
-        "describe someone who is expected to die soon.  Usage: That " \
-        "splat job ain't long for this world chummer, I's telling ya.",
-        "diamond season" : "Diamond season: Warm weather, or " \
-        "good times.  Usage: You been outside today?  Diamond season mano.",
-        "chinese take-out" : "Chinese Takeout: What someone's insides look " \
-        "like after being attacked violently.  Usage: I had that chummer " \
-        "looking like chinese takeout when I was done with 'em."}
+# --------------- Helper Functions ------------------
+def load_json_from_file(file_name):
+    '''load a json file into a data structure we can reference'''
+    with open(file_name) as data_file:
+        data = json.load(data_file)
+    return data
 
+def random_file(directory):
+    '''get a random filename from the directory provided'''
+    return random.choice(os.listdir(directory))
+
+def build_definition_speech_response(word_data):
+    return "{0}: {1} Usage: {2}".format(word_data['name'], word_data['definition'], random.choice(list(word_data['usage'])))
+
+# --------------- Functions that control the skill's behavior ------------------
+
+def get_help(intent, session):
+    """ tell the user a list of valid commands """
+    #load the json data for this intent
+    response_data = load_json_from_file(SPEECH_DIRECTORY + get_help.__name__ + SPEECH_FORMAT)
+    session_attributes = {}
+    should_end_session = False
+    
+    return build_response(session_attributes, build_speechlet_response(
+        response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
+
+def pick_cyberpunk_word(intent, session):
+    '''pick a random cyberpunk word and tell the user about it'''
+    #no need to add the file format since random_file returns a full file name
+    word_data = load_json_from_file(DICTIONARY_DIRECTORY + random_file(DICTIONARY_DIRECTORY))
+    #load response data
+    response_data = load_json_from_file(SPEECH_DIRECTORY + pick_cyberpunk_word.__name__ + SPEECH_FORMAT)
+    session_attributes = {}
+    should_end_session = False
+    
+    return build_response(session_attributes, build_speechlet_response(
+        response_data['card_title'], build_definition_speech_response(word_data), response_data['reprompt'], 
+        should_end_session))
+        
+def welcome_response():
+    ''' If we wanted to initialize the session to have some attributes we could
+    add those here
+    '''
+    response_data = load_json_from_file(SPEECH_DIRECTORY + welcome_response.__name__ + SPEECH_FORMAT)
+    session_attributes = {}
+    should_end_session = False
+    return build_response(session_attributes, build_speechlet_response(
+        response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
+
+
+def define_cyberpunk_word(intent, session):
+    ''' Sets the color in the session and prepares the speech to reply to the
+    user.
+    '''
+    response_data = load_json_from_file(SPEECH_DIRECTORY + define_cyberpunk_word.__name__ + SPEECH_FORMAT)
+    print(response_data)
+    session_attributes = {}
+    should_end_session = False
+    cyberpunk_word = intent['slots']['CyberpunkWord']['value'].lower()
+
+    print(DICTIONARY_DIRECTORY + cyberpunk_word)
+    if os.path.isfile(DICTIONARY_DIRECTORY + cyberpunk_word + DICTIONARY_FORMAT):
+        word_data = load_json_from_file(DICTIONARY_DIRECTORY + cyberpunk_word + DICTIONARY_FORMAT)
+        speech_output = build_definition_speech_response(word_data)
+        reprompt = response_data['reprompt']
+    else:
+        speech_output = response_data['failure_response']
+        reprompt = response_data['failure_reprompt']
+        
+    print(intent['slots']['CyberpunkWord']['value'].lower())
+    return build_response(session_attributes, build_speechlet_response(
+        response_data['card_title'], speech_output, reprompt, should_end_session))
+
+def invalid_intent_response(intent, session):
+    '''
+    we reached an invalid intention due to the user asking for something
+    that we are not sure how to process.
+    '''
+    print(intent)
+    response_data = load_json_from_file(SPEECH_DIRECTORY + invalid_intent_response.__name__ + SPEECH_FORMAT)
+    session_attributes = {}
+    should_end_session = False
+    return build_response(session_attributes, build_speechlet_response(
+        response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
+
+# --------------- Skill Dipatcher Functions ------------------
 def lambda_handler(event, context):
     """ Route the incoming request based on type (LaunchRequest, IntentRequest,
     etc.) The JSON body of the request is provided in the event parameter.
@@ -73,7 +147,7 @@ def on_launch(launch_request, session):
     print("on_launch requestId=" + launch_request['requestId'] +
           ", sessionId=" + session['sessionId'])
     # Dispatch to your skill's launch
-    return get_welcome_response()
+    return welcome_response()
 
 
 def on_intent(intent_request, session):
@@ -96,7 +170,7 @@ def on_intent(intent_request, session):
     elif intent_name == "AMAZON.HelpIntent":
         return get_help(intent, session)
     else:
-        raise ValueError("Invalid intent")
+        return invalid_intent_response(intent, session)
 
 
 def on_session_ended(session_ended_request, session):
@@ -108,101 +182,6 @@ def on_session_ended(session_ended_request, session):
           ", sessionId=" + session['sessionId'])
     # add cleanup logic here
 
-# --------------- Functions that control the skill's behavior ------------------
-
-def get_help(intent, session):
-    """ tell the user a list of valid commands """
-    session_attributes = {}
-    card_title = 'Help'
-    speech_output = "You can ask me to define a specific word by asking, " \
-                    "What does baka mean?" \
-                    "Or tell me to give you a Cyberpunk word, " \
-    
-    reprompt_text = "Ask me for help if you want to hear the list of " \
-                    "commands again."
-    
-    should_end_session = False
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
-def pick_cyberpunk_word(intent, session):
-    """ tell the user a list of valid commands """
-    session_attributes = {}
-    card_title = 'Pick Cyberpunk Word'
-    speech_output = random.choice(list(dict.values()))
-    
-    reprompt_text = "Ask me for help if you want to hear the list of " \
-                    "commands again."
-    
-    should_end_session = False
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-        
-def get_welcome_response():
-    """ If we wanted to initialize the session to have some attributes we could
-    add those here
-    """
-
-    session_attributes = {}
-    card_title = "Welcome"
-    speech_output = "Welcome to the Cyberpunk Dictionary. " \
-                    "Ask me for help to hear a list of commands."
-    # If the user either does not reply to the welcome message or says something
-    # that is not understood, they will be prompted again with this text.
-    reprompt_text = "Please ask me to define a specific word with, " \
-                    "What does chinese takeout mean, " \
-                    "Or ask me for help for more commands"
-    should_end_session = False
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
-
-def define_cyberpunk_word(intent, session):
-    """ Sets the color in the session and prepares the speech to reply to the
-    user.
-    """
-
-    card_title = intent['name']
-    session_attributes = {}
-    should_end_session = False
-    speech_output = None
-    reprompt_text = None
-    cyberpunk_word = 'undefined'
-
-    if 'CyberpunkWord' in intent['slots']:
-        cyberpunk_word = intent['slots']['CyberpunkWord']['value'].lower()
-        #session_attributes = create_favorite_color_attributes(favorite_color)
-        if cyberpunk_word in dict:
-            speech_output = dict[cyberpunk_word.lower()]
-            reprompt_text = 'Would you like me to define another word for you'
-    
-    
-    if not speech_output:
-        speech_output = "I'm unable to define the word you're looking for, " \
-                        "Please try again." \
-        
-        print(intent['slots']['CyberpunkWord']['value'].lower())
-        reprompt_text = "I'm unable to define the word you're looking for, " \
-                        "You can ask me to define a word by saying, " \
-                        "What does baka mean"
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
-
-def invalid_intent_response(intent, session):
-    session_attributes = {}
-    reprompt_text = None
-
-    speech_output = "I was unable to figrue out what you wanted.  You can ask" \
-                    "for help and I can give you a list of possible queries."
-                    
-    should_end_session = False
-
-    # Setting reprompt_text to None signifies that we do not want to reprompt
-    # the user. If the user does not respond or says something that is not
-    # understood, the session will end.
-    return build_response(session_attributes, build_speechlet_response(
-        intent['name'], speech_output, reprompt_text, should_end_session))
 # --------------- Helpers that build all of the responses ----------------------
 
 

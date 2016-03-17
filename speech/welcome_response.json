@@ -1,0 +1,6 @@
+{
+    "name" : "welcome_response",
+    "card_title" : "Welcome to the Cyberpunk Dictionary",
+    "response" : "Welcome to the Cyberpunk Dictionary. Ask me for a Cyberpunk word or for help to hear a list of commands.",
+    "reprompt" : "You can ask me for help to hear a list of commands."
+}

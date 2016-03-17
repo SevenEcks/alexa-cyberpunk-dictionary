@@ -1,0 +1,6 @@
+{
+    "name" : "invalid_intent_response",
+    "card_title" : "Error: Unable to process your request",
+    "response" : "I was unable to figrue out what you wanted.  You can ask for help and I can give you a list of possible queries.",
+    "reprompt" : "You can ask me for help to hear a list of commands."
+}
