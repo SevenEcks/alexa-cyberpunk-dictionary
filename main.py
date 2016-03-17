@@ -44,6 +44,16 @@ def get_help(intent, session):
     return build_response(session_attributes, build_speechlet_response(
         response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
 
+def get_sindome(intent, session):
+    '''tell the user about sindome'''
+    #load the json data for this intent
+    response_data = load_json_from_file(SPEECH_DIRECTORY + get_sindome.__name__ + SPEECH_FORMAT)
+    session_attributes = {}
+    should_end_session = False
+    
+    return build_response(session_attributes, build_speechlet_response(
+        response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
+
 def pick_cyberpunk_word(intent, session):
     '''pick a random cyberpunk word and tell the user about it'''
     #no need to add the file format since random_file returns a full file name
@@ -62,6 +72,14 @@ def welcome_response():
     response_data = load_json_from_file(SPEECH_DIRECTORY + welcome_response.__name__ + SPEECH_FORMAT)
     session_attributes = {}
     should_end_session = False
+    return build_response(session_attributes, build_speechlet_response(
+        response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
+
+def handle_stop(intent, session):
+    '''User has requested a stop, so we exit'''
+    response_data = load_json_from_file(SPEECH_DIRECTORY + handle_stop.__name__ + SPEECH_FORMAT)
+    session_attributes = {}
+    should_end_session = True
     return build_response(session_attributes, build_speechlet_response(
         response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
 
@@ -141,8 +159,13 @@ def on_intent(intent_request, session):
         return define_cyberpunk_word(intent, session)
     elif intent_name == "PickCyberpunkWord":
         return pick_cyberpunk_word(intent, session)
+    elif intent_name == "Sindome":
+        return get_sindome(intent, session)
+    #handle help, exiting and stopping properly
     elif intent_name == "AMAZON.HelpIntent":
         return get_help(intent, session)
+    elif intent_name == "AMAZON.StopIntent" or intent_name == 'AMAZON.CancelIntent':
+        return handle_stop(intent, session)
     else:
         return invalid_intent_response(intent, session)
 

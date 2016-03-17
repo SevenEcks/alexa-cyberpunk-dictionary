@@ -1,0 +1,6 @@
+{
+    "name" : "handle_stop",
+    "card_title" : "Exiting Cyberpunk Dictionary",
+    "response" : "No problemo.  Check you later, chummer.",
+    "reprompt" : "You can ask me for help to hear a list of commands."
+}

@@ -1,0 +1,6 @@
+{
+    "name" : "sindome",
+    "card_title" : "Sindome",
+    "response" : "Sindome is a free online text-based cyperpunk roleplaying game that has been online since nineteen ninety seven.  It can be played in a mud client, or in your browser.  Visit us on the web at w w w dot sindome dot o r g",
+    "reprompt" : "You can ask me for help to hear a list of commands."
+}
