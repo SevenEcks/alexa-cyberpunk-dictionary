@@ -15,6 +15,8 @@ PickCyberpunkWord define a cyberpunk word
 PickCyberpunkWord throw a cyberpunk word at me
 PickCyberpunkWord throw me a cyberpunk word
 PickCyberpunkWord tell me ah cyberpunk word baka
+PickCyberpunkWord for a word
+PickCyberpunkWord for a cyberpunk word
 DefineCyberpunkWord What does {CyberpunkWord} mean
 DefineCyberpunkWord Define what {CyberpunkWord} means
 DefineCyberpunkWord Tell me what {CyberpunkWord} means
@@ -23,3 +25,6 @@ DefineCyberpunkWord Define {CyberpunkWord} for me
 DefineCyberpunkWord Define {CyberpunkWord}
 DefineCyberpunkWord Explain {CyberpunkWord} for me
 DefineCyberpunkWord Explain {CyberpunkWord}
+DefineCyberpunkWord what {CyberpunkWord} means
+DefineCyberpunkWord to define {CyberpunkWord}
+DefineCyberpunkWord for the definition of {CyberpunkWord}
