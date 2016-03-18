@@ -1,6 +1,6 @@
 {
     "name" : "baka",
-    "definition" : "Slang for fool, or idiot.",
+    "definition" : "Slang for fool, idiot, or punk.",
     "usage" : [
         "Don't be a baka.",
         "Listen baka, you must'a known this ain't was gunna work, yeah?",
@@ -10,6 +10,7 @@
     "english" : [
         "fool",
         "idiot",
-        "dumb ass"
+        "dumb ass",
+        "punk"
     ]
 }

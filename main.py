@@ -18,13 +18,29 @@ DICTIONARY_DIRECTORY = 'dictionary/'
 DICTIONARY_FORMAT = '.json'
 SPEECH_DIRECTORY = 'speech/'
 SPEECH_FORMAT = '.json'
-
+DEBUG = True
 # --------------- Helper Functions ------------------
+def debug(data):
+    '''if debugging is enabled this will push debugs to the logs'''
+    if DEBUG:
+        print(data)
+
 def load_json_from_file(file_name):
     '''load a json file into a data structure we can reference'''
     with open(file_name) as data_file:
         data = json.load(data_file)
     return data
+
+def load_word(file_name):
+    '''load a word based on the file name, and recursively load any redirects'''
+    debug(file_name)
+    word_data = load_json_from_file(file_name)
+    if "redirect" in word_data:
+        #we have a redirect
+        name = word_data['name']
+        word_data = load_word(DICTIONARY_DIRECTORY + word_data['redirect'] + DICTIONARY_FORMAT)
+        word_data['definition'] = 'Redirected from ' + name + '.  ' + word_data['definition']
+    return word_data
 
 def random_file(directory):
     '''get a random filename from the directory provided'''
@@ -57,14 +73,14 @@ def get_sindome(intent, session):
 def pick_cyberpunk_word(intent, session):
     '''pick a random cyberpunk word and tell the user about it'''
     #no need to add the file format since random_file returns a full file name
-    word_data = load_json_from_file(DICTIONARY_DIRECTORY + random_file(DICTIONARY_DIRECTORY))
+    word_data = load_word(DICTIONARY_DIRECTORY + random_file(DICTIONARY_DIRECTORY))
     #load response data
     response_data = load_json_from_file(SPEECH_DIRECTORY + pick_cyberpunk_word.__name__ + SPEECH_FORMAT)
     session_attributes = {}
     should_end_session = False
     
     return build_response(session_attributes, build_speechlet_response(
-        response_data['card_title'], build_definition_speech_response(word_data), response_data['reprompt'], 
+        response_data['card_title'], build_definition_speech_response(word_data) + " " + response_data['response'], response_data['reprompt'], 
         should_end_session))
 
 def welcome_response():
@@ -85,28 +101,31 @@ def handle_stop(intent, session):
 
 def define_cyberpunk_word(intent, session):
     '''Sets the color in the session and prepares the speech to reply to the user'''
+    debug(SPEECH_DIRECTORY + define_cyberpunk_word.__name__ + SPEECH_FORMAT)
     response_data = load_json_from_file(SPEECH_DIRECTORY + define_cyberpunk_word.__name__ + SPEECH_FORMAT)
-    print(response_data)
+    debug(response_data)
     session_attributes = {}
     should_end_session = False
-    cyberpunk_word = intent['slots']['CyberpunkWord']['value'].lower()
-
-    print(DICTIONARY_DIRECTORY + cyberpunk_word)
+    cyberpunk_word = intent['slots']['CyberpunkWord']['value'].lower() \
+                                                              .replace(' ', '_') \
+                                                              .replace('-','')
+    debug(DICTIONARY_DIRECTORY + cyberpunk_word)
     if os.path.isfile(DICTIONARY_DIRECTORY + cyberpunk_word + DICTIONARY_FORMAT):
-        word_data = load_json_from_file(DICTIONARY_DIRECTORY + cyberpunk_word + DICTIONARY_FORMAT)
+        debug(intent['slots']['CyberpunkWord']['value'].lower())
+        word_data = load_word(DICTIONARY_DIRECTORY + cyberpunk_word + DICTIONARY_FORMAT)
         speech_output = build_definition_speech_response(word_data)
         reprompt = response_data['reprompt']
     else:
         speech_output = response_data['failure_response']
         reprompt = response_data['failure_reprompt']
         
-    print(intent['slots']['CyberpunkWord']['value'].lower())
+    
     return build_response(session_attributes, build_speechlet_response(
-        response_data['card_title'], speech_output, reprompt, should_end_session))
+        response_data['card_title'], speech_output + " " + response_data['response'], reprompt, should_end_session))
 
 def invalid_intent_response(intent, session):
     '''Invalid intention due to the user asking for something we are not sure how to process'''
-    print(intent)
+    debug(intent)
     response_data = load_json_from_file(SPEECH_DIRECTORY + invalid_intent_response.__name__ + SPEECH_FORMAT)
     session_attributes = {}
     should_end_session = False
@@ -114,12 +133,35 @@ def invalid_intent_response(intent, session):
         response_data['card_title'], response_data['response'], response_data['reprompt'], should_end_session))
 
 # --------------- Skill Dipatcher Functions ------------------
+
+def on_intent(intent_request, session):
+    '''Called when the user specifies an intent for this skill'''
+    intent = intent_request['intent']
+    intent_name = intent_request['intent']['name']
+    debug(intent_name)
+
+    # Dispatch to your skill's intent handlers
+    if intent_name == "DefineCyberpunkWord":
+        return define_cyberpunk_word(intent, session)
+    elif intent_name == "PickCyberpunkWord":
+        return pick_cyberpunk_word(intent, session)
+    elif intent_name == "Sindome":
+        return get_sindome(intent, session)
+    #handle help, exiting and stopping properly
+    elif intent_name == "AMAZON.HelpIntent":
+        return get_help(intent, session)
+    elif intent_name == "AMAZON.StopIntent" or intent_name == 'AMAZON.CancelIntent':
+        return handle_stop(intent, session)
+    else:
+        return invalid_intent_response(intent, session)
+
 def lambda_handler(event, context):
     '''Route the incoming request based on type (LaunchRequest, IntentRequest,
     etc.) The JSON body of the request is provided in the event parameter.
     '''
-    print("event.session.application.applicationId=" +
-          event['session']['application']['applicationId'])
+    debug(event)
+    #debug("event.session.application.applicationId=" +
+          #event['session']['application']['applicationId'])
 
     #Prevent someone else from configuring a skill that sends requests to this function.
     if (event['session']['application']['applicationId'] != 
@@ -141,37 +183,16 @@ def lambda_handler(event, context):
 def on_session_started(session_started_request, session):
     '''Called when the session starts'''
 
-    print("on_session_started requestId=" + session_started_request['requestId']
-          + ", sessionId=" + session['sessionId'])
+    #debug("on_session_started requestId=" + session_started_request['requestId']
+          #+ ", sessionId=" + session['sessionId'])
 
 def on_launch(launch_request, session):
     '''Called when the user launches the skill without specifying an intent '''
     return welcome_response()
 
-def on_intent(intent_request, session):
-    '''Called when the user specifies an intent for this skill'''
-    intent = intent_request['intent']
-    intent_name = intent_request['intent']['name']
-    print(intent_name)
-
-    # Dispatch to your skill's intent handlers
-    if intent_name == "DefineCyberpunkWord":
-        return define_cyberpunk_word(intent, session)
-    elif intent_name == "PickCyberpunkWord":
-        return pick_cyberpunk_word(intent, session)
-    elif intent_name == "Sindome":
-        return get_sindome(intent, session)
-    #handle help, exiting and stopping properly
-    elif intent_name == "AMAZON.HelpIntent":
-        return get_help(intent, session)
-    elif intent_name == "AMAZON.StopIntent" or intent_name == 'AMAZON.CancelIntent':
-        return handle_stop(intent, session)
-    else:
-        return invalid_intent_response(intent, session)
-
 def on_session_ended(session_ended_request, session):
     '''Called when the user ends the session.
-        Is not called when the skill returns should_end_session=true
+    Is not called when the skill returns should_end_session=true
     '''
     pass
 

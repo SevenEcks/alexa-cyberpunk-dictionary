@@ -1,8 +1,8 @@
 {
     "name" : "define_cyberpunk_word",
     "card_title" : "Cyberpunk Word Definition",
-    "response" : "",
+    "response" : "You can ask me to define another word for you, ask me about Sin Dome or ask me for a random cyberpunk word.",
     "reprompt" : "You can ask me for help to hear a list of commands.",
     "failure_response" : "I'm unable to define the word you're looking for, please try again.",
-    "failure_reprompt" : "I'm unable to define the word you're looking for, please try again."
+    "failure_reprompt" : "I was unable to define that word, would you like me to define something else?"
 }

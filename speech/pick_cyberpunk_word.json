@@ -1,6 +1,6 @@
 {
     "name" : "pick_cyberpunk_word",
     "card_title" : "Pick Cyberpunk Word",
-    "response" : "",
+    "response" : "Tell me to give you another random cyberpunk word, ask me about Sin Dome, or, ask me to define a specific Cyberpunk word.",
     "reprompt" : "You can ask me for help to hear a list of commands."
 }
