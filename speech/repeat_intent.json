@@ -1,0 +1,6 @@
+{
+    "name" : "repeat_intent",
+    "card_title" : "Repeat",
+    "response" : "I'm unable to repeat that for you right now.  Please make another request.",
+    "reprompt" : "You can ask me for help to hear a list of commands."
+}
